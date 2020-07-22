@@ -102,10 +102,18 @@ public class ClientsController {
 	@PostMapping
 	public ResponseEntity<?> postClients(@RequestBody @Valid ClientDto client, BindingResult result) {
 		if (result.hasErrors()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Le nom et le prenom doivent etre entrés.");
-		}	
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Le nom et le prenom doivent etre entres.");
+		}
 		
-		Client clientBase = clientService.creerClient(client.getNom(), client.getPrenoms());
+		String nomClient = client.getNom();
+		String prenomsClient = client.getPrenoms();
+		
+		if (nomClient.length() < 2 || prenomsClient.length() < 2) {
+			
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Veuillez entrer un nom et prenom avec au moins 2 caracteres.");
+		}
+		
+		Client clientBase = clientService.creerClient(nomClient, prenomsClient);
 		return ResponseEntity.status(HttpStatus.OK).body(clientBase);
 	}
 	

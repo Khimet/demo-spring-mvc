@@ -152,7 +152,7 @@ public class ClientsControllerTest {
 		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
 				.andExpect(MockMvcResultMatchers.status().is(400))
-				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre valorises."));
+				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre entres."));
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class ClientsControllerTest {
 		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
 				.andExpect(MockMvcResultMatchers.status().is(400))
-				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre valorises."));
+				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre entres."));
 	}
 
 	@Test
@@ -170,7 +170,16 @@ public class ClientsControllerTest {
 		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
 				.andExpect(MockMvcResultMatchers.status().is(400))
-				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre valorises."));
+				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre entres."));
+	}
+	
+	@Test
+	public void CreerClientPrenomsTest_Un_Caractere() throws Exception {
+		String jsonBody = "{ \"nom\": \"Odd\", \"prenoms\": \"R\" }";
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
+				.andExpect(MockMvcResultMatchers.status().isBadRequest())
+				.andExpect(MockMvcResultMatchers.content().string("Veuillez entrer un nom et prenom avec au moins 2 caracteres."));
 	}
 	
 	
