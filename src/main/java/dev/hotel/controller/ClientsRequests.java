@@ -39,19 +39,25 @@ public class ClientsRequests {
 	}
 	
 	@GetMapping("pagination")
-	public List<Client> GetClientsPage(
+	public ResponseEntity<?> GetClientsPage(
 			@RequestParam("start") Integer page,
 			@RequestParam("size") Integer size){
 		
-		
+		if ( size == null || page == null || page < 0 || size <= 0 ) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error");
+		}
 		
 		PageRequest paging = PageRequest.of(page, size);
 		
 		Page<Client> clients = clientsRepository.findAll(paging);
 		
-		List<Client> resultats = clients.getContent();
+		//List<Client> resultats = clients.getContent();
 		
-		return resultats;
+		//return resultats;
+		
+		return ResponseEntity.status(HttpStatus.OK).body(clients.getContent());
+		
+		
 		
 	}
 	
