@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -28,6 +29,7 @@ import org.springframework.web.context.WebApplicationContext;
 import dev.hotel.controller.ClientsController;
 import dev.hotel.entite.Client;
 import dev.hotel.repository.ClientsRepository;
+import dev.hotel.service.ClientService;
 
 /**
  * @author Khalil HIMET
@@ -40,7 +42,7 @@ public class ClientsControllerTest {
 	private MockMvc mockMvc;
 	
 	@MockBean
-	private ClientsRepository clientsRepository;
+	private ClientService clientService;
 	
 	@Test
 	public void clientsPaginationTest() throws Exception {
@@ -69,7 +71,7 @@ public class ClientsControllerTest {
 		
 		Page<Client> paging = new PageImpl<>(clients);
 		
-		Mockito.when(clientsRepository.findAll(PageRequest.of(0, 3))).thenReturn(paging);
+		Mockito.when(clientService.getClientsPage(0, 3)).thenReturn(paging);
 		
 		mockMvc.perform(MockMvcRequestBuilders.get("/clients/pagination?start=0&size=3"))
 		.andExpect(MockMvcResultMatchers.status().isOk())
@@ -99,7 +101,7 @@ public class ClientsControllerTest {
 		
 		UUID uuid = UUID.fromString("dcf129f1-a2f9-47dc-8265-1d844244b789");
 		
-		Mockito.when(clientsRepository.findById(uuid)).thenReturn(Optional.empty());
+		Mockito.when(clientService.findClientFromUUID(uuid)).thenReturn(Optional.empty());
 		
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/clients/UUID/dcf129f1-a2f9-47dc-8265-1d844244b789"))
 				.andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
@@ -114,7 +116,7 @@ public class ClientsControllerTest {
         
         UUID uuid = UUID.fromString("dcf129f1-a2f9-47dc-8265-1d844244b192");
         
-        Mockito.when(clientsRepository.findById(uuid)).thenReturn(Optional.of(client1));
+        Mockito.when(clientService.findClientFromUUID(uuid)).thenReturn(Optional.of(client1));
         
         mockMvc.perform(MockMvcRequestBuilders.get("/clients/UUID/dcf129f1-a2f9-47dc-8265-1d844244b192"))
         .andExpect(MockMvcResultMatchers.status().isAccepted())
@@ -124,6 +126,54 @@ public class ClientsControllerTest {
 		
 		
 	}
+	
+	@Test
+	public void CreerClientTest() throws Exception {
+		Client c1 = new Client();
+		c1.setNom("test");
+		c1.setPrenoms("test");
+		c1.setUuid(UUID.fromString("ddd123d1-a1d1-12dd-1234-1d123456d123"));
+		// mockito
+		Mockito.when(clientService.creerClient("test", "test")).thenReturn(c1);
+		// json body
+		String jsonBody = "{ \"nom\": \"test\", \"prenoms\": \"test\" }";
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
+				.andExpect(MockMvcResultMatchers.status().is(200))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.uuid").value("ddd123d1-a1d1-12dd-1234-1d123456d123"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.nom").value("test"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.prenoms").value("test"));
+	}
+
+	@Test
+	public void CreerClientNomVideTest() throws Exception {
+		// json body
+		String jsonBody = "{ \"nom\": \"\", \"prenoms\": \"Ross\" }";
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
+				.andExpect(MockMvcResultMatchers.status().is(400))
+				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre valorises."));
+	}
+
+	@Test
+	public void CreerClientPrenomsVideTest() throws Exception {
+		String jsonBody = "{ \"nom\": \"Odd\", \"prenoms\": \"\" }";
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
+				.andExpect(MockMvcResultMatchers.status().is(400))
+				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre valorises."));
+	}
+
+	@Test
+	public void CreerClientToutVideTest() throws Exception {
+		String jsonBody = "{  }";
+		mockMvc.perform(MockMvcRequestBuilders.post("/clients").contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON).content(jsonBody))
+				.andExpect(MockMvcResultMatchers.status().is(400))
+				.andExpect(MockMvcResultMatchers.content().string("Le nom et le prenom doivent etre valorises."));
+	}
+	
+	
 	
 	
 	

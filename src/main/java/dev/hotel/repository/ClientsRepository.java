@@ -21,7 +21,7 @@ public interface ClientsRepository extends JpaRepository<Client, UUID> {
 	
 	//Page<Client> findAll(Pageable pageable);
 	
-	@Query("select c from Client c where c.uuid = ?1")
-	Client findClientbyUUID(UUID uuid);
+//	@Query("select c from Client c where c.uuid = ?1")
+//	Client findClientbyUUID(UUID uuid);
 
 }
