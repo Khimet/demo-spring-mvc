@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import dev.hotel.controller.ClientsPagination;
+import dev.hotel.controller.ClientsRequests;
 import dev.hotel.entite.Client;
 import dev.hotel.repository.ClientsRepository;
 
@@ -29,8 +29,8 @@ import dev.hotel.repository.ClientsRepository;
  * @author Khalil HIMET
  *
  */
-@WebMvcTest(ClientsPagination.class)
-public class ClientsPaginationTest {
+@WebMvcTest(ClientsRequests.class)
+public class ClientsRequestsTest {
 	
 	@Autowired
 	private MockMvc mockMvc;
@@ -39,7 +39,7 @@ public class ClientsPaginationTest {
 	private ClientsRepository clientsRepository;
 	
 	@Test
-	void clientsPaginationTest() throws Exception {
+	public void clientsPaginationTest() throws Exception {
 		
 		//List<Client> clients = clientsRepository.findAll();
 		
@@ -67,7 +67,7 @@ public class ClientsPaginationTest {
 		
 		Mockito.when(clientsRepository.findAll(PageRequest.of(0, 3))).thenReturn(paging);
 		
-		mockMvc.perform(MockMvcRequestBuilders.get("/clientsPage/clientsParams?start=0&size=3"))
+		mockMvc.perform(MockMvcRequestBuilders.get("/clients/pagination?start=0&size=3"))
 		.andExpect(MockMvcResultMatchers.status().isOk())
 		.andExpect(MockMvcResultMatchers.jsonPath("$[0].uuid").value("dcf129f1-a2f9-47dc-8265-1d844244b192"))
         .andExpect(MockMvcResultMatchers.jsonPath("$[0].nom").value("Odd"))
@@ -79,6 +79,17 @@ public class ClientsPaginationTest {
         .andExpect(MockMvcResultMatchers.jsonPath("$[2].nom").value("Etienne"))
         .andExpect(MockMvcResultMatchers.jsonPath("$[2].prenoms").value("Joly"));
 	}
+	
+	@Test
+	public void ClientFromUUIDTest_uuid_non_valide() throws Exception {
+		
+		mockMvc.perform(MockMvcRequestBuilders.get("/clients/UUID/abc"))
+		.andExpect(MockMvcResultMatchers.status().isBadRequest())
+		.andExpect(MockMvcResultMatchers.content().string("l'UUID entré n'est pas valide"));
+		
+		
+	}
+	
 	
 	
 	
