@@ -1,7 +1,10 @@
 package dev.hotel;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,12 +19,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import dev.hotel.controller.ClientsRequests;
+import dev.hotel.controller.ClientsController;
 import dev.hotel.entite.Client;
 import dev.hotel.repository.ClientsRepository;
 
@@ -29,8 +33,8 @@ import dev.hotel.repository.ClientsRepository;
  * @author Khalil HIMET
  *
  */
-@WebMvcTest(ClientsRequests.class)
-public class ClientsRequestsTest {
+@WebMvcTest(ClientsController.class)
+public class ClientsControllerTest {
 	
 	@Autowired
 	private MockMvc mockMvc;
@@ -86,6 +90,37 @@ public class ClientsRequestsTest {
 		mockMvc.perform(MockMvcRequestBuilders.get("/clients/UUID/abc"))
 		.andExpect(MockMvcResultMatchers.status().isBadRequest())
 		.andExpect(MockMvcResultMatchers.content().string("l'UUID entré n'est pas valide"));
+		
+		
+	}
+	
+	@Test
+	public void ClientFromUUIDTest_client_not_found() throws Exception {
+		
+		UUID uuid = UUID.fromString("dcf129f1-a2f9-47dc-8265-1d844244b789");
+		
+		Mockito.when(clientsRepository.findById(uuid)).thenReturn(Optional.empty());
+		
+		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/clients/UUID/dcf129f1-a2f9-47dc-8265-1d844244b789"))
+				.andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
+		assertThat(result.getResponse().getContentAsString()).contains("l'UUID entré ne correspond pas à un client de la base de données");
+	}
+	
+	@Test
+	public void ClientFromUUIDTest_client_found() throws Exception {
+		
+		Client client1 = new Client("Odd", "Ross");
+        client1.setUuid(UUID.fromString("dcf129f1-a2f9-47dc-8265-1d844244b192"));
+        
+        UUID uuid = UUID.fromString("dcf129f1-a2f9-47dc-8265-1d844244b192");
+        
+        Mockito.when(clientsRepository.findById(uuid)).thenReturn(Optional.of(client1));
+        
+        mockMvc.perform(MockMvcRequestBuilders.get("/clients/UUID/dcf129f1-a2f9-47dc-8265-1d844244b192"))
+        .andExpect(MockMvcResultMatchers.status().isAccepted())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.uuid").value("dcf129f1-a2f9-47dc-8265-1d844244b192"))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.nom").value("Odd"))
+        .andExpect(MockMvcResultMatchers.jsonPath("$.prenoms").value("Ross"));
 		
 		
 	}

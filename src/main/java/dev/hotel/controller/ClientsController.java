@@ -26,14 +26,14 @@ import dev.hotel.repository.ClientsRepository;
  */
 @RestController
 @RequestMapping("clients")
-public class ClientsRequests {
+public class ClientsController {
 	
 	private ClientsRepository clientsRepository;
 
 	/** Constructeur
 	 * @param clientsRepository
 	 */
-	public ClientsRequests(ClientsRepository clientsRepository) {
+	public ClientsController(ClientsRepository clientsRepository) {
 		super();
 		this.clientsRepository = clientsRepository;
 	}
